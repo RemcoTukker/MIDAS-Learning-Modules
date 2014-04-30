@@ -1,0 +1,46 @@
+/**
+ * IDL description of the MeanAndVarianceModule
+ *
+ * This file is automatically parsed by the rurbuilder backends for the omniidl compiler. The names of the functions
+ * will become port identifiers. The names of the function variables are not used. 
+ *
+ * The syntax of the IDL file also allows for "inout", but not all middlewares will accept this yet.
+ */
+
+#pragma author               Remco Tukker
+#pragma copyright            Almende
+#pragma date                 Apr 28, 2014
+#pragma license              
+
+// Recommended namespace "rur"
+module rur {
+
+// The command-line parameter (this struct is required)
+struct Param {
+  // multiple modules can be addressed in parallel, killed, etc. using "module_id"
+  string module_id;
+  // a certain parameter over the command-line (long becomes int) 
+  //long parameter;
+};
+
+// Typedef for array of integers
+//typedef sequence<long> long_seq;
+
+// The public interface of MeanAndVarianceModule
+interface MeanAndVarianceModule {
+
+  // Input of samples (only floats, js doesnt have int)
+  void Duration(in float input);
+
+  // Input of control signals
+  void Control(in float controlInput); //would have chosen string, but doesnt seem to work in NodeJS backend
+
+  // Give the mean of the input samples
+  void Mean(out float mean);
+
+  // Give the variance of the input samples
+  void Variance(out float variance);
+
+};
+
+};

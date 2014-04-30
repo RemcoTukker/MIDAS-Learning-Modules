@@ -1,0 +1,95 @@
+/**
+ * @file MeanAndVarianceModuleExt.cpp
+ * @brief MeanAndVarianceModule extension
+ *
+ * This file is created at "Almende". It is open-source software and part of "". 
+ * This software is published under the  license ().
+ *
+ * Copyright © 2014 Remco Tukker <>
+ *
+ * @author                   Remco Tukker
+ * @date                     Apr 28, 2014
+ * @organisation             Almende
+ * @project                  
+ */
+
+#include <MeanAndVarianceModuleExt.h>
+#include <iostream>
+
+using namespace rur;
+
+//! Replace with your own code
+MeanAndVarianceModuleExt::MeanAndVarianceModuleExt() {
+
+	activeCohort = 0;
+	nrOfCohorts = 10;
+	samplesPerCohort = 10000;
+
+	reset();
+}
+
+
+MeanAndVarianceModuleExt::~MeanAndVarianceModuleExt() {
+
+}
+
+void MeanAndVarianceModuleExt::reset() {
+
+	for (int i = 0; i < nrOfCohorts; i++) {
+		nrOfSamples[i] = 0 + i * samplesPerCohort / nrOfCohorts; // cohorts start at 0, 1000, 2000, etc
+		mean[i] = 0;
+		m2[i] = 0;
+	}
+
+}
+
+
+void MeanAndVarianceModuleExt::Tick() {
+
+	// read sample
+	float *sample = readDuration();
+
+	float *control = readControl();
+	if ( *control > 0.5 && *control < 1.5) reset(); //reset all the values
+	// other control values?
+
+	// return if we didnt get anything
+	if (!sample) return; 
+	std::cout << "got sample " << *sample << std::endl;
+
+	for (int i = 0; i < nrOfCohorts; i++) {
+
+		// bookkeeping of cohorts; cohorts are switched and old one is reset to 0 to prevent nrOfSamples from overflowing
+		if (nrOfSamples[i] > samplesPerCohort) {
+			nrOfSamples[i] = 0;
+			mean[i] = 0;
+			m2[i] = 0;
+			if (activeCohort == i) activeCohort = (activeCohort + 1) % nrOfCohorts; // switch to next cohort
+		}
+
+		//actual calculation of mean and variance (following Knuth)
+		nrOfSamples[i]++;
+		double delta = *sample - mean[i];
+		mean[i] = mean[i] + delta / nrOfSamples[i];
+		m2[i] = m2[i] + delta * (*sample - mean[i]);
+	}
+
+	// maybe its nice to give users the alternative of keeping a very big array with samples in memory, saving
+	// some processing time and having a true moving average, but having a much bigger memory 
+	// footprint (order of 100s of kb per module when you want to keep eg 10k samples)
+
+
+	double variance = -1; // -1 for "infinite" (only 1 sample)
+	if (nrOfSamples[activeCohort] > 1) variance = m2[activeCohort] / (nrOfSamples[activeCohort] - 1);
+
+	// give outputs (or maybe only if we get a request?)
+	writeMean(mean[activeCohort]);
+	writeVariance(variance);
+	return;
+}
+
+//! Replace with your own code
+bool MeanAndVarianceModuleExt::Stop() {
+	return false;
+}
+

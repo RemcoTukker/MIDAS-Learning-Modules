@@ -1,0 +1,48 @@
+/**
+ * @file MeanAndVarianceModuleExt.h
+ * @brief MeanAndVarianceModule extension
+ *
+ * This file is created at "Almende". It is open-source software and part of "". 
+ * This software is published under the  license ().
+ *
+ * Copyright © 2014 Remco Tukker <>
+ *
+ * @author                   Remco Tukker
+ * @date                     Apr 28, 2014
+ * @organisation             Almende
+ * @project                  
+ */
+
+#include <MeanAndVarianceModule.h>
+
+namespace rur {
+
+/**
+ * Your Description of this module.
+ */
+class MeanAndVarianceModuleExt: public MeanAndVarianceModule {
+public:
+	//! The constructor
+	MeanAndVarianceModuleExt();
+
+	//! The destructor
+	virtual ~MeanAndVarianceModuleExt();
+
+	//! The tick function is the "heart" of your module, it reads and writes to the ports
+	void Tick();
+
+	//! As soon as Stop() returns "true", the MeanAndVarianceModuleMain will stop the module
+	bool Stop();
+
+private:
+	int activeCohort;
+	int nrOfCohorts;
+	int samplesPerCohort;
+	int nrOfSamples[10];
+	double mean[10]; // note, size should agree with nrOfCohorts... I know, ugly, make this dynamic, etc...
+	double m2[10];
+
+};
+
+}
+
